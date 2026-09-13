@@ -165,6 +165,18 @@ main::before{content:"";position:absolute;inset:-20px -8px -50px;z-index:-1;back
 
 
 .flip-example-front{font-family:Georgia,serif;font-size:1.14rem;font-style:italic;font-weight:700;line-height:1.5;text-align:center;color:#30343a}
+.question-cards{padding-bottom:22px}
+.flip-instruction{margin:8px 0 20px;padding:12px 14px;border-left:4px solid var(--accent);border-radius:10px;background:rgba(255,255,255,.68)}
+.question-group-title{margin:24px 0 8px;font-size:1.05rem;color:var(--accent)}
+.question-flip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.question-flip-grid.single-card{grid-template-columns:1fr}
+.question-card,.question-card .flip-inner{min-height:230px}
+.question-card .flip-face{overflow:auto}
+.question-card .flip-front{padding-top:46px}
+.question-number{position:absolute;top:14px;left:14px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:900}
+.rewrite-card,.rewrite-card .flip-inner{min-height:290px}
+.writing-card,.writing-card .flip-inner{min-height:220px}
+@media(max-width:700px){.question-flip-grid{grid-template-columns:1fr}.question-card,.question-card .flip-inner{min-height:220px}.rewrite-card,.rewrite-card .flip-inner{min-height:340px}}
 .flip-back .flip-name{margin-bottom:12px;text-align:center}
 .flip-back .flip-def{text-align:center}
 .video-tech-note{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.72);font-size:.82rem;line-height:1.45;border:1px solid rgba(0,0,0,.08)}
@@ -191,20 +203,39 @@ Parfois, je suis mélancolique ; parfois, je suis de mauvaise humeur. À un mome
 Cela m’arrive même avec mes propres écrits : je ne retrouve pas toujours le sens de ce que je pensais autrefois. Je ne sais parfois même plus ce que j’avais voulu dire. En voulant corriger mon texte ou lui donner un nouveau sens, il m’arrive alors de l’abîmer, parce que j’ai oublié ma première idée, qui était meilleure.
 Chacun pourrait sans doute en dire autant sur lui-même, s’il prenait le temps de s’observer comme je le fais.<span class="citation">Michel de Montaigne, <i>Essais</i>, livre II, chap. 12, 1580 (langue modernisée).</span></div>
 <div class="lesson"><h4>L’essai littéraire</h4><p>Un <b>essai</b> est une œuvre dans laquelle l’auteur développe une réflexion personnelle. Il peut prendre pour sujet les grandes questions de la vie — l’amour, la mort, le pouvoir, le sens de la vie… — et adopte un ton libre et personnel. Montaigne a donné son nom au genre avec les <i>Essais</i>.</p><div class="mini-summary">À retenir : dans un essai, l’auteur réfléchit, argumente, doute, se corrige et assume un point de vue personnel.</div></div>
-<div class="exercise"><h4><span class="num">1</span> Compréhension et interprétation</h4><div class="q"><label>1. Pour qui Montaigne dit-il écrire et pourquoi ? Est-il sincère selon toi ?</label><textarea class="answer" data-save="s1q1"></textarea></div><div class="q"><label>2. Quel ton utilise-t-il pour s’adresser au lecteur ? Appuie-toi sur les pronoms.</label><textarea class="answer" data-save="s1q2"></textarea></div><div class="q"><label>3. De quelle manière veut-il se raconter ? Sur quoi insiste-t-il ?</label><textarea class="answer" data-save="s1q3"></textarea></div><div class="q"><label>4. À quelles difficultés se heurte-t-il lorsqu’il tente de se connaître ?</label><textarea class="answer" data-save="s1q4"></textarea></div></div>
-<div class="exercise"><h4><span class="num">2</span> Grammaire et compétences linguistiques</h4><div class="q"><label>5. Quelle figure de style reconnais-tu dans « m’ayant perdu » ?</label><input class="answer" data-save="s1q5"/></div><div class="q"><label>6. Et dans « je suis moi-même la matière de mon livre » ?</label><input class="answer" data-save="s1q6"/></div><div class="q"><label>7. Et dans « Je suis traversé par mille émotions » ?</label><input class="answer" data-save="s1q7"/></div><details class="reveal"><summary>Voir la correction</summary><div class="corr">5. Euphémisme : « m’ayant perdu » atténue l’évocation de la mort en la formulant avec délicatesse. 6. Métaphore : Montaigne se présente comme la « matière » de son livre. 7. Hyperbole avec « mille », qui amplifie le nombre d’émotions.</div></details></div>
-<div class="exercise"><h4><span class="num">3</span> Réécriture — entraînement DNB</h4><p>Réécris « Cela m’arrive même avec mes propres écrits […] qui était meilleure » à l’imparfait et à la 1<sup>re</sup> personne du pluriel.</p><textarea class="answer" data-save="s1rewrite"></textarea></div>
-<div class="exercise"><h4><span class="num">4</span> Écriture</h4><div class="q"><label>Penses-tu que les réseaux sociaux permettent aux autres de vraiment te connaître ? Rédige un paragraphe argumenté, nuancé ou tranché.</label><textarea class="answer" data-save="s1write"></textarea></div></div>
-<details class="teacher-correction"><summary>Comparer mes réponses avec la correction complète</summary><div class="corr-body">
-<ol><li>Montaigne dit écrire pour ses parents et ses amis afin qu’après sa mort ils puissent se souvenir de lui tel qu’il était. Sa démarche paraît sincère, même si un paradoxe demeure : il affirme écrire pour ses proches tout en s’adressant à un lecteur extérieur.</li>
-<li>Il s’adresse au lecteur sur un ton direct, simple, familier et complice. Les apostrophes au « lecteur » et le tutoiement créent une proximité propice à la confidence.</li>
-<li>Il veut se peindre fidèlement, sans artifice : simplicité, naturel, défauts et imperfections doivent apparaître. Il recherche la vérité plutôt que la perfection.</li>
-<li>Se décrire avec objectivité est difficile car le regard sur soi est forcément subjectif. De plus, l’être humain est complexe et changeant : goûts, réactions et émotions varient avec le temps.</li>
-<li><b>Euphémisme</b> : « m’ayant perdu » évoque délicatement sa mort en adoucissant cette réalité pénible.</li>
-<li><b>Métaphore</b> : « je suis moi-même la matière de mon livre » fait de l’auteur la matière/source de son œuvre.</li>
-<li><b>Hyperbole</b> : « mille émotions » exagère leur nombre pour insister sur leur profusion.</li>
-<li><b>Réécriture :</b> « Cela nous arrivait même avec nos propres écrits : nous ne retrouvions pas toujours le sens de ce que nous avions pensé autrefois. Nous ne savions parfois même plus ce que nous avions voulu dire. En voulant corriger notre texte ou lui donner un nouveau sens, il nous arrivait alors de l’abîmer, parce que nous avions oublié notre première idée, qui était meilleure. »</li></ol>
-</div></details>
+<div class="exercise question-cards"><h4><span class="num">1</span> Questions et réponses</h4>
+<p class="flip-instruction"><b>Révise activement :</b> lis la question, formule mentalement ta réponse, puis retourne la carte pour la vérifier.</p>
+
+<h5 class="question-group-title">Compréhension et interprétation</h5>
+<div class="flip-grid question-flip-grid">
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">1</span><span class="flip-def">Pour qui Montaigne dit-il écrire et pourquoi ? Est-il sincère selon toi ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">Montaigne dit écrire pour ses parents et ses amis afin qu’après sa mort ils puissent se souvenir de lui tel qu’il était. Sa démarche paraît sincère, même si un paradoxe demeure : il affirme écrire pour ses proches tout en s’adressant à un lecteur extérieur.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">2</span><span class="flip-def">Quel ton utilise-t-il pour s’adresser au lecteur ? Appuie-toi sur les pronoms.</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">Il s’adresse au lecteur sur un ton direct, simple, familier et complice. Les apostrophes au « lecteur » et le tutoiement créent une proximité propice à la confidence.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">3</span><span class="flip-def">De quelle manière veut-il se raconter ? Sur quoi insiste-t-il ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">Il veut se peindre fidèlement, sans artifice : simplicité, naturel, défauts et imperfections doivent apparaître. Il recherche la vérité plutôt que la perfection.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">4</span><span class="flip-def">À quelles difficultés se heurte-t-il lorsqu’il tente de se connaître ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">Se décrire avec objectivité est difficile car le regard sur soi est forcément subjectif. De plus, l’être humain est complexe et changeant : goûts, réactions et émotions varient avec le temps.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+</div>
+
+<h5 class="question-group-title">Grammaire et compétences linguistiques</h5>
+<div class="flip-grid question-flip-grid">
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">5</span><span class="flip-def">Quelle figure de style reconnais-tu dans « m’ayant perdu » ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-name">Euphémisme</span><span class="flip-def">« M’ayant perdu » évoque délicatement sa mort en adoucissant cette réalité pénible.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">6</span><span class="flip-def">Et dans « je suis moi-même la matière de mon livre » ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-name">Métaphore</span><span class="flip-def">Montaigne fait de l’auteur la matière, c’est-à-dire le sujet et la source, de son œuvre.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+
+<button aria-pressed="false" class="flip-card question-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">7</span><span class="flip-def">Et dans « Je suis traversé par mille émotions » ?</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-name">Hyperbole</span><span class="flip-def">« Mille émotions » exagère leur nombre pour insister sur leur profusion.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+</div>
+
+<h5 class="question-group-title">Réécriture — entraînement DNB</h5>
+<div class="flip-grid question-flip-grid single-card">
+<button aria-pressed="false" class="flip-card question-card rewrite-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">8</span><span class="flip-def">Réécris « Cela m’arrive même avec mes propres écrits […] qui était meilleure » à l’imparfait et à la 1<sup>re</sup> personne du pluriel.</span><span class="flip-hint">Clique pour voir la réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">« Cela nous arrivait même avec nos propres écrits : nous ne retrouvions pas toujours le sens de ce que nous avions pensé autrefois. Nous ne savions parfois même plus ce que nous avions voulu dire. En voulant corriger notre texte ou lui donner un nouveau sens, il nous arrivait alors de l’abîmer, parce que nous avions oublié notre première idée, qui était meilleure. »</span><span class="flip-hint">Clique pour revoir la consigne ↺</span></span></span></button>
+</div>
+
+<h5 class="question-group-title">Écriture</h5>
+<div class="flip-grid question-flip-grid single-card">
+<button aria-pressed="false" class="flip-card question-card writing-card" type="button"><span class="flip-inner"><span class="flip-face flip-front"><span class="question-number">9</span><span class="flip-def">Penses-tu que les réseaux sociaux permettent aux autres de vraiment te connaître ?</span><span class="flip-hint">Clique pour découvrir des pistes de réponse ↻</span></span><span class="flip-face flip-back"><span class="flip-def">Il n’existe pas une seule bonne réponse. Construis un paragraphe avec une opinion claire, un argument et un exemple. Tu peux montrer que les réseaux sociaux dévoilent certains goûts, mais qu’ils présentent souvent une image choisie, partielle ou embellie de soi.</span><span class="flip-hint">Clique pour revoir la question ↺</span></span></span></button>
+</div>
+</div>
 <div class="waybox"><div><strong>À toi de jouer ! — Quiz Wayground</strong></div><a class="btn way" href="https://wayground.com/join?gc=21327381&amp;source=liveDashboard" rel="noopener" target="_blank">Ouvrir Wayground ↗</a></div></div></section>
 
 
