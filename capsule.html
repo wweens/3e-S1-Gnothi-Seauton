@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="#231c18" name="theme-color"/>
-<title>Capsule temporelle — Gnôthi Seauton (V9)</title>
+<title>Capsule temporelle — Gnôthi Seauton (V10)</title>
 <style>
 :root{--ink:#27211d;--cream:#fff9f3;--accent:#c86d2a;--accent2:#8f3c22;--soft:#f6e9df;--green:#2f7650}
 *{box-sizing:border-box}
@@ -109,7 +109,7 @@ h2{font-family:Georgia,serif;font-size:2rem;margin:14px 0 12px;color:var(--accen
 <div class="spacer"></div>
 <button class="action primary" onclick="saveNow(true)">💾 Enregistrer</button>
 <button class="action" onclick="printWork()">🖨️ Imprimer / PDF</button>
-<button class="action send" onclick="sendToDrive()">📨 Envoyer à M. Weens</button>
+<button class="action send" data-send-button onclick="sendToDrive()">📨 Envoyer à M. Weens</button>
 <a class="back" href="index.html">← Séquence</a>
 </div>
 </div>
@@ -176,9 +176,11 @@ h2{font-family:Georgia,serif;font-size:2rem;margin:14px 0 12px;color:var(--accen
 </div><div class="actions-bottom">
 <button class="bigbtn save" onclick="saveNow(true)">💾 Enregistrer</button>
 <button class="bigbtn print" onclick="printWork()">🖨️ Créer ma version imprimable / PDF</button>
-<button class="bigbtn send" id="sendButton" onclick="sendToDrive()">📨 Envoyer à M. Weens</button>
+<button class="bigbtn save" onclick="downloadWork()">📥 Télécharger une copie de secours</button>
+<button class="bigbtn send" id="sendButton" data-send-button onclick="sendToDrive()">📨 Envoyer à M. Weens</button>
 </div>
-<div class="notice" id="driveNotice"></div>
+<div class="notice" id="draftNotice" role="status" aria-live="polite"></div>
+<div class="notice" id="driveNotice" role="status" aria-live="polite">Conserve une copie de ton travail : une transmission ne garantit pas sa réception. Seule la confirmation de M. Weens fait foi.</div>
 </section>
 </main>
 <!-- Envoi vers Google Apps Script / Drive -->
@@ -194,6 +196,12 @@ const STORE="gnothi_capsule_v8";
 const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycby3Uk0nYPuJUWV4S7_uWq3ZdigZ2d8b810GOnvS_9cKDIVxNN8vPTj0Hxpk1UMv-_dr/exec";
 const state={fields:{},images:{}};
 let toastTimer;
+let pendingImages=0;
+let sendInProgress=false;
+let submissionAttempted=false;
+let draftWarning=false;
+let draftReadFailed=false;
+const imageVersions=new WeakMap();
 
 function toast(t){
   const e=document.getElementById("toast");
@@ -204,41 +212,117 @@ function toast(t){
 function collect(){
   document.querySelectorAll("[data-key]").forEach(e=>state.fields[e.dataset.key]=e.value);
 }
+function draftMessage(text){
+  document.getElementById("draftNotice").textContent=text;
+}
 function restore(){
-  try{Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
-  document.querySelectorAll("[data-key]").forEach(e=>e.value=(state.fields||{})[e.dataset.key]||"");
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORE)||'{}');
+    if(saved&&typeof saved==="object"){
+      state.fields=saved.fields&&typeof saved.fields==="object"&&!Array.isArray(saved.fields)?saved.fields:{};
+      state.images=saved.images&&typeof saved.images==="object"&&!Array.isArray(saved.images)?saved.images:{};
+    }
+  }catch(e){
+    draftWarning=true;
+    draftReadFailed=true;
+    draftMessage("⚠ Le brouillon de cet appareil n’a pas pu être lu. Ne supprime pas les données du navigateur ; conserve une copie de tout travail encore visible.");
+  }
+  document.querySelectorAll("[data-key]").forEach(e=>e.value=String((state.fields||{})[e.dataset.key]||""));
   document.querySelectorAll("[data-image-key]").forEach(zone=>{
-    const key=zone.dataset.imageKey;
-    const src=(state.images||{})[key];
+    const src=(state.images||{})[zone.dataset.imageKey];
     const img=zone.querySelector("img");
-    if(src&&img){img.src=src;zone.classList.add("has-image");}
+    if(typeof src==="string"&&/^data:image\//i.test(src)&&img){img.src=src;zone.classList.add("has-image");}
   });
 }
 function saveNow(showToast=false){
   collect();
-  localStorage.setItem(STORE,JSON.stringify(state));
-  if(showToast) toast("✓ Travail enregistré sur cet appareil");
+  if(draftReadFailed){
+    draftMessage("⚠ L’ancien brouillon est illisible et reste conservé sans modification. Télécharge une copie de ce travail avant de fermer la page ; l’envoi et l’impression restent disponibles.");
+    if(showToast) toast("Ancien brouillon préservé : télécharge une copie du travail actuel.");
+    return false;
+  }
+  try{
+    localStorage.setItem(STORE,JSON.stringify(state));
+    if(draftWarning) draftMessage("✓ Brouillon enregistré sur cet appareil. Garde aussi une copie de secours.");
+    draftWarning=false;
+    if(showToast) toast("✓ Travail enregistré sur cet appareil — pas encore envoyé");
+    return true;
+  }catch(e){
+    draftWarning=true;
+    draftMessage("⚠ Sauvegarde locale impossible (espace plein ou stockage indisponible). Ton travail reste dans cette page : télécharge une copie de secours avant de la fermer. L’envoi et l’impression restent disponibles.");
+    if(showToast) toast("⚠ Sauvegarde impossible : télécharge une copie de secours.");
+    return false;
+  }
 }
 document.addEventListener("input",e=>{if(e.target.matches("[data-key]")){clearTimeout(window.__saveTimer);window.__saveTimer=setTimeout(()=>saveNow(false),350)}});
 
-
-document.addEventListener("change",e=>{
+function photoBusy(){
+  if(!pendingImages) return false;
+  toast("Patiente : une photo est encore en cours de préparation.");
+  return true;
+}
+function readImageFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error("Lecture impossible"));
+    reader.onabort=()=>reject(new Error("Lecture annulée"));
+    reader.readAsDataURL(file);
+  });
+}
+function compactImage(src){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onerror=()=>reject(new Error("Image non prise en charge"));
+    img.onload=()=>{
+      try{
+        if(!img.naturalWidth||!img.naturalHeight) throw new Error("Image vide");
+        let scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+        let width=Math.max(1,Math.round(img.naturalWidth*scale));
+        let height=Math.max(1,Math.round(img.naturalHeight*scale));
+        const canvas=document.createElement("canvas");
+        const ctx=canvas.getContext("2d");
+        if(!ctx) throw new Error("Compression indisponible");
+        let result="";
+        for(let attempt=0;attempt<9;attempt++){
+          canvas.width=width;canvas.height=height;
+          ctx.fillStyle="#ffffff";ctx.fillRect(0,0,width,height);
+          ctx.drawImage(img,0,0,width,height);
+          result=canvas.toDataURL("image/jpeg",Math.max(.55,.84-attempt*.04));
+          if(result.length<=300000) return resolve(result);
+          width=Math.max(1,Math.round(width*.8));height=Math.max(1,Math.round(height*.8));
+        }
+        reject(new Error("Photo trop volumineuse"));
+      }catch(e){reject(e);}
+    };
+    img.src=src;
+  });
+}
+document.addEventListener("change",async e=>{
   const input=e.target;
   if(!input.matches('[data-image-key] input[type="file"]')) return;
   const zone=input.closest("[data-image-key]");
   const file=input.files&&input.files[0];
   if(!zone||!file) return;
+  const version=(imageVersions.get(input)||0)+1;
+  imageVersions.set(input,version);
   if(!file.type.startsWith("image/")){toast("Choisis un fichier image.");return;}
-  const reader=new FileReader();
-  reader.onload=ev=>{
+  if(file.size>25*1024*1024){toast("Cette photo est trop lourde. Choisis une image de moins de 25 Mo.");return;}
+  pendingImages++;
+  try{
+    const src=await compactImage(await readImageFile(file));
+    if(imageVersions.get(input)!==version) return;
     state.images=state.images||{};
-    state.images[zone.dataset.imageKey]=ev.target.result;
+    state.images[zone.dataset.imageKey]=src;
     const img=zone.querySelector("img");
-    if(img){img.src=ev.target.result;zone.classList.add("has-image");}
-    localStorage.setItem(STORE,JSON.stringify(state));
-    toast("✓ Photo ajoutée");
-  };
-  reader.readAsDataURL(file);
+    if(img){img.src=src;zone.classList.add("has-image");}
+    const saved=saveNow(false);
+    toast(saved?"✓ Photo préparée et enregistrée":"✓ Photo ajoutée — télécharge une copie de secours");
+  }catch(e){
+    if(imageVersions.get(input)===version) toast("Photo non ajoutée. Essaie une image JPEG ou PNG ; l’ancienne photo est conservée.");
+  }finally{
+    pendingImages--;
+  }
 });
 
 function imgBlock(src,alt){
@@ -274,6 +358,7 @@ function studentDocument(){
 }
 
 function printWork(){
+  if(photoBusy()) return;
   saveNow(false);
   const f=state.fields||{};
   const imgs=state.images||{};
@@ -478,38 +563,82 @@ function printWork(){
   w.document.close();
 }
 
+function downloadWork(){
+  if(photoBusy()) return;
+  collect();
+  try{
+    const blob=new Blob([studentDocument()],{type:"text/html;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement("a");
+    link.href=url;link.download=filename();link.style.display="none";
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    toast("Copie proposée au téléchargement. Vérifie qu’elle est bien dans tes fichiers.");
+  }catch(e){
+    toast("Téléchargement impossible. Garde la page ouverte et copie ton texte dans un document.");
+  }
+}
+function setSendButtons(disabled,label){
+  document.querySelectorAll("[data-send-button]").forEach(btn=>{btn.disabled=disabled;btn.textContent=label;});
+}
 function sendToDrive(){
+  if(sendInProgress){toast("Une transmission est déjà en cours. Ne clique pas à nouveau.");return;}
+  if(photoBusy()) return;
   saveNow(false);
   const nom=String(state.fields.nom||"").trim(),prenom=String(state.fields.prenom||"").trim(),classe=String(state.fields.classe||"").trim();
   if(!nom||!prenom||!classe){toast("Renseigne d’abord ton nom, ton prénom et ta classe.");return;}
+  const notice=document.getElementById("driveNotice");
   if(APPS_SCRIPT_URL.includes("PASTE_YOUR")){
     toast("L’envoi Drive n’est pas encore configuré.");
-    document.getElementById("driveNotice").textContent="Il faut d’abord ajouter l’adresse de l’application Google Apps Script.";
+    notice.textContent="L’envoi n’est pas configuré. Télécharge une copie de secours et préviens M. Weens.";
     return;
   }
-  const btn=document.getElementById("sendButton");
-  const notice=document.getElementById("driveNotice");
-  btn.disabled=true;btn.textContent="⏳ Envoi en cours…";
-  notice.textContent="Préparation et envoi de ta capsule…";
+  if(navigator.onLine===false){
+    notice.textContent="⚠ Tu sembles hors connexion. Aucun envoi n’a été lancé. Conserve une copie de secours puis réessaie une fois connecté.";
+    toast("Hors connexion : aucun envoi lancé.");
+    return;
+  }
+  if(submissionAttempted&&!window.confirm("La réception du précédent envoi n’est pas confirmée. Réessayer peut créer un doublon. Veux-tu quand même transmettre à nouveau ?")) return;
 
   const form=document.getElementById("driveUploadForm");
-  form.action=APPS_SCRIPT_URL;
-  document.getElementById("driveFilename").value=filename();
-  document.getElementById("driveHtml").value=studentDocument();
-  form.submit();
-
-  let done=false;
   const frame=document.getElementById("driveUploadFrame");
+  sendInProgress=true;
+  setSendButtons(true,"⏳ Transmission en cours…");
+  notice.textContent="Transmission demandée. Ne ferme pas la page ; conserve une copie de secours. La réception par M. Weens n’est pas encore confirmée.";
+  let finished=false;
+  let timeout;
   const finish=()=>{
-    if(done)return;done=true;
-    btn.disabled=false;btn.textContent="✓ Capsule envoyée";
-    notice.textContent="✓ Ta capsule a été transmise à M. Weens.";
-    toast("✓ Capsule envoyée à M. Weens");
+    if(finished) return;
+    finished=true;
+    clearTimeout(timeout);
+    frame.onload=null;
+    sendInProgress=false;
+    setSendButtons(false,"📨 Réessayer l’envoi");
+    notice.textContent="⚠ Réception non confirmée : le service actuel ne renvoie pas de reçu vérifiable. Le chargement d’une page ou l’absence de message d’erreur ne prouve pas que M. Weens a reçu ta capsule. Télécharge une copie de secours et demande-lui confirmation avant de réessayer.";
+    toast("Réception non confirmée — garde une copie de secours.");
   };
-  frame.onload=()=>setTimeout(finish,450);
-  setTimeout(finish,3500);
+  // A loaded iframe is NOT proof that Apps Script stored the document.
+  frame.onload=finish;
+  timeout=setTimeout(finish,30000);
+  try{
+    form.action=APPS_SCRIPT_URL;
+    document.getElementById("driveFilename").value=filename();
+    document.getElementById("driveHtml").value=studentDocument();
+    form.submit();
+    submissionAttempted=true;
+  }catch(e){
+    finished=true;
+    clearTimeout(timeout);
+    frame.onload=null;
+    sendInProgress=false;
+    setSendButtons(false,"📨 Envoyer à M. Weens");
+    notice.textContent="⚠ La transmission n’a pas pu être lancée. Ton travail reste dans cette page : télécharge une copie de secours puis préviens M. Weens.";
+    toast("Transmission impossible : conserve une copie de secours.");
+  }
 }
+
 restore();
 </script>
 </body>
 </html>
+
