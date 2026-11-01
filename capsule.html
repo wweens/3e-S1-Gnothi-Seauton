@@ -180,7 +180,7 @@ h2{font-family:Georgia,serif;font-size:2rem;margin:14px 0 12px;color:var(--accen
 <button class="bigbtn send" id="sendButton" data-send-button onclick="sendToDrive()">📨 Envoyer à M. Weens</button>
 </div>
 <div class="notice" id="draftNotice" role="status" aria-live="polite"></div>
-<div class="notice" id="driveNotice" role="status" aria-live="polite">Conserve une copie de ton travail : une transmission ne garantit pas sa réception. Seule la confirmation de M. Weens fait foi.</div>
+<div class="notice" id="driveNotice" role="status" aria-live="polite">Après l’envoi, attends le message confirmant que ta capsule a bien été enregistrée. Garde aussi une copie de secours.</div>
 </section>
 </main>
 <!-- Envoi vers Google Apps Script / Drive -->
@@ -581,7 +581,7 @@ function downloadWork(){
 function setSendButtons(disabled,label){
   document.querySelectorAll("[data-send-button]").forEach(btn=>{btn.disabled=disabled;btn.textContent=label;});
 }
-function sendToDrive(){
+async function sendToDrive(){
   if(sendInProgress){toast("Une transmission est déjà en cours. Ne clique pas à nouveau.");return;}
   if(photoBusy()) return;
   saveNow(false);
@@ -598,42 +598,30 @@ function sendToDrive(){
     toast("Hors connexion : aucun envoi lancé.");
     return;
   }
-  if(submissionAttempted&&!window.confirm("La réception du précédent envoi n’est pas confirmée. Réessayer peut créer un doublon. Veux-tu quand même transmettre à nouveau ?")) return;
-
-  const form=document.getElementById("driveUploadForm");
-  const frame=document.getElementById("driveUploadFrame");
+  if(submissionAttempted&&!window.confirm("Une capsule a déjà été transmise depuis cette page. Un nouvel envoi peut créer un doublon. Veux-tu transmettre à nouveau ?")) return;
   sendInProgress=true;
-  setSendButtons(true,"⏳ Transmission en cours…");
-  notice.textContent="Transmission demandée. Ne ferme pas la page ; conserve une copie de secours. La réception par M. Weens n’est pas encore confirmée.";
-  let finished=false;
-  let timeout;
-  const finish=()=>{
-    if(finished) return;
-    finished=true;
-    clearTimeout(timeout);
-    frame.onload=null;
-    sendInProgress=false;
-    setSendButtons(false,"📨 Réessayer l’envoi");
-    notice.textContent="⚠ Réception non confirmée : le service actuel ne renvoie pas de reçu vérifiable. Le chargement d’une page ou l’absence de message d’erreur ne prouve pas que M. Weens a reçu ta capsule. Télécharge une copie de secours et demande-lui confirmation avant de réessayer.";
-    toast("Réception non confirmée — garde une copie de secours.");
-  };
-  // A loaded iframe is NOT proof that Apps Script stored the document.
-  frame.onload=finish;
-  timeout=setTimeout(finish,30000);
+  setSendButtons(true,"⏳ Envoi en cours…");
+  notice.textContent="Envoi en cours. Attends la confirmation de l’enregistrement avant de fermer la page.";
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),90000);
   try{
-    form.action=APPS_SCRIPT_URL;
-    document.getElementById("driveFilename").value=filename();
-    document.getElementById("driveHtml").value=studentDocument();
-    form.submit();
+    const body=new URLSearchParams({filename:filename(),html:studentDocument()});
     submissionAttempted=true;
+    const response=await fetch(APPS_SCRIPT_URL,{method:"POST",body,credentials:"omit",redirect:"follow",signal:controller.signal});
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    // This capsule service returns plain text OK after saving, not the journals' JSON format.
+    const receipt=(await response.text()).trim();
+    if(receipt!=="OK") throw new Error("Réponse du service non reconnue");
+    setSendButtons(false,"✓ Capsule envoyée");
+    notice.textContent="✓ Ta capsule a bien été enregistrée pour M. Weens. Tu peux fermer cette page. Garde aussi une copie de secours.";
+    toast("✓ Enregistrement de ta capsule confirmé.");
   }catch(e){
-    finished=true;
+    setSendButtons(false,"📨 Réessayer l’envoi");
+    notice.textContent="⚠ L’enregistrement n’a pas pu être confirmé. Cela ne signifie pas forcément que ta capsule a été perdue. Garde cette page ouverte, télécharge une copie de secours et demande confirmation à M. Weens avant de réessayer.";
+    toast("Enregistrement non confirmé : conserve une copie de secours.");
+  }finally{
     clearTimeout(timeout);
-    frame.onload=null;
     sendInProgress=false;
-    setSendButtons(false,"📨 Envoyer à M. Weens");
-    notice.textContent="⚠ La transmission n’a pas pu être lancée. Ton travail reste dans cette page : télécharge une copie de secours puis préviens M. Weens.";
-    toast("Transmission impossible : conserve une copie de secours.");
   }
 }
 
